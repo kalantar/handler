@@ -24,6 +24,12 @@ type Task interface {
 // Action is a slice of Tasks.
 type Action []Task
 
+// TaskMeta is common to all Tasks
+type TaskMeta struct {
+	Library string `json:"library" yaml:"library"`
+	Task    string `json:"task" yaml:"task"`
+}
+
 // Run the given action.
 func (a *Action) Run(ctx context.Context) error {
 	for i := 0; i < len(*a); i++ {

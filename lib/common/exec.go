@@ -17,7 +17,7 @@ import (
 type ExecInputs struct {
 	Cmd                  string        `json:"cmd" yaml:"cmd"`
 	Args                 []interface{} `json:"args,omitempty" yaml:"args,omitempty"`
-	DisableInterpolation bool          `json:"disableInterpolation,omitempty" json:"disableInterpolation,omitempty"`
+	DisableInterpolation bool          `json:"disableInterpolation,omitempty" yaml:"disableInterpolation,omitempty"`
 }
 
 // ExecTask encapsulates a command that can be executed.
