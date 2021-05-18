@@ -53,8 +53,15 @@ func MakeSlackTask(t *v2alpha2.TaskSpec) (base.Task, error) {
 	return task, err
 }
 
-// Run the task.
+// Run the task. This suppresses all errors so that the task will always succeed.
+// In this way, any failure does not cause failure of the enclosing experiment.
 func (t *SlackTask) Run(ctx context.Context) error {
+	t.internalRun(ctx)
+	return nil
+}
+
+// Actual task runner
+func (t *SlackTask) internalRun(ctx context.Context) error {
 	// Called to execute the Task
 	// Retrieve the experiment object (if needed)
 	exp, err := experiment.GetExperimentFromContext(ctx)
@@ -103,7 +110,7 @@ func SlackMessage(e *experiment.Experiment) string {
 		"Type: " + Italic(string(e.Spec.Strategy.TestingPattern)),
 		"Target: " + Italic(e.Spec.Target),
 		"Versions: " + Italic(Versions(e)),
-		"Status: " + Italic(Status(e)),
+		"Stage: " + Italic(string(*e.Status.Stage)),
 	}
 
 	if e.Status.Analysis != nil &&
@@ -130,13 +137,13 @@ func Versions(e *experiment.Experiment) string {
 	return strings.Join(versions, ", ")
 }
 
-func Status(e *experiment.Experiment) string {
-	if "finish" == viper.GetViper().GetString("action") {
-		// if e.Status.GetCondition(v2alpha2.ExperimentConditionExperimentCompleted).IsTrue() {
-		return "Completed"
-	}
-	return "Not Completed"
-}
+// func Status(e *experiment.Experiment) string {
+// 	if "finish" == viper.GetViper().GetString("action") {
+// 		// if e.Status.GetCondition(v2alpha2.ExperimentConditionExperimentCompleted).IsTrue() {
+// 		return "Completed"
+// 	}
+// 	return "Not Completed"
+// }
 
 func Bold(text string) string {
 	return "*" + text + "*"
