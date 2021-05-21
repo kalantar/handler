@@ -6,6 +6,7 @@ import (
 	"time"
 
 	iter8 "github.com/iter8-tools/etc3/api/v2alpha2"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -45,19 +46,39 @@ var GetClient = func() (rc client.Client, err error) {
 	}
 
 	var addKnownTypes = func(scheme *runtime.Scheme) error {
-		// register iter8.GroupVersion metatype
+		// register iter8.GroupVersion and type
 		metav1.AddToGroupVersion(scheme, iter8.GroupVersion)
-		// register experiment type
 		scheme.AddKnownTypes(iter8.GroupVersion, &Experiment{})
-		// register knative GroupVersion metatype
+
+		var gvk schema.GroupVersionKind
+		var gv schema.GroupVersion
+
+		// Support for notification library
+		// s := &corev1.Secret{}
+		gvk = schema.GroupVersionKind{
+			Group:   "",
+			Version: "v1",
+			Kind:    "Secret",
+		}
+		// gvk = s.GetObjectKind().GroupVersionKind()
+		gv = schema.GroupVersion{
+			Group:   gvk.Group,
+			Version: gvk.Version,
+		}
+		metav1.AddToGroupVersion(scheme, schema.GroupVersion{
+			Group:   gvk.Group,
+			Version: gvk.Version,
+		})
+		scheme.AddKnownTypes(gv, &corev1.Secret{})
+
+		// Support for knative library
 		ksvc := &servingv1.Service{}
-		gvk := ksvc.GetGroupVersionKind()
-		gv := schema.GroupVersion{
+		gvk = ksvc.GetGroupVersionKind()
+		gv = schema.GroupVersion{
 			Group:   gvk.Group,
 			Version: gvk.Version,
 		}
 		metav1.AddToGroupVersion(scheme, gv)
-		// register knative service type
 		scheme.AddKnownTypes(gv, ksvc)
 		return nil
 	}

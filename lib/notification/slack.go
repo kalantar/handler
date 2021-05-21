@@ -12,9 +12,8 @@ import (
 	"github.com/iter8-tools/handler/experiment"
 	"github.com/slack-go/slack"
 	"github.com/spf13/viper"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
@@ -85,7 +84,7 @@ func (t *SlackTask) postNotification(e *experiment.Experiment) error {
 		t.With.Channel,
 		slack.MsgOptionBlocks(slack.NewSectionBlock(&slack.TextBlockObject{
 			Type: slack.MarkdownType,
-			Text: Bold(e.Namespace + "/" + e.Name),
+			Text: Bold(Name(e)),
 		}, nil, nil)),
 		slack.MsgOptionAttachments(slack.Attachment{
 			Blocks: slack.Blocks{
@@ -110,20 +109,23 @@ func SlackMessage(e *experiment.Experiment) string {
 		"Type: " + Italic(string(e.Spec.Strategy.TestingPattern)),
 		"Target: " + Italic(e.Spec.Target),
 		"Versions: " + Italic(Versions(e)),
-		"Stage: " + Italic(string(*e.Status.Stage)),
+		"Stage: " + Italic(Stage(e)),
+		"Winner: " + Italic(Winner(e)),
 	}
 
-	if e.Status.Analysis != nil &&
-		e.Status.Analysis.WinnerAssessment != nil {
-		var winner string
-		if e.Status.Analysis.WinnerAssessment.Data.WinnerFound {
-			winner = *e.Status.Analysis.WinnerAssessment.Data.Winner
-		} else {
-			winner = " not found"
-		}
-		msg = append(msg, "Winner: "+Italic(winner))
+	if Failed(e) {
+		msg = append(msg, "Failed: "+Italic("true"))
 	}
+
 	return strings.Join(msg, NewLine())
+}
+
+func Name(e *experiment.Experiment) string {
+	ns := e.Namespace
+	if len(ns) == 0 {
+		ns = "default"
+	}
+	return ns + "/" + e.Name
 }
 
 func Versions(e *experiment.Experiment) string {
@@ -137,13 +139,29 @@ func Versions(e *experiment.Experiment) string {
 	return strings.Join(versions, ", ")
 }
 
-// func Status(e *experiment.Experiment) string {
-// 	if "finish" == viper.GetViper().GetString("action") {
-// 		// if e.Status.GetCondition(v2alpha2.ExperimentConditionExperimentCompleted).IsTrue() {
-// 		return "Completed"
-// 	}
-// 	return "Not Completed"
-// }
+func Stage(e *experiment.Experiment) string {
+	stage := v2alpha2.ExperimentStageWaiting
+	if e.Status.Stage != nil {
+		stage = *e.Status.Stage
+	}
+	return string(stage)
+}
+
+func Winner(e *experiment.Experiment) string {
+	winner := "not found"
+	if e.Status.Analysis != nil &&
+		e.Status.Analysis.WinnerAssessment != nil {
+		if e.Status.Analysis.WinnerAssessment.Data.WinnerFound {
+			winner = *e.Status.Analysis.WinnerAssessment.Data.Winner
+		}
+	}
+	return winner
+}
+
+func Failed(e *experiment.Experiment) bool {
+	// use !.. IsFalse() to allow undefined value => true
+	return !e.Status.GetCondition(v2alpha2.ExperimentConditionExperimentFailed).IsFalse()
+}
 
 func Bold(text string) string {
 	return "*" + text + "*"
@@ -172,18 +190,9 @@ func (t *SlackTask) getToken() *string {
 	log.Trace("namespace", namespace)
 	log.Trace("name", name)
 
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		log.Error(err)
-		return nil
-	}
+	secret := corev1.Secret{}
+	err := experiment.GetTypedObject(&types.NamespacedName{Namespace: namespace, Name: name}, &secret)
 
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Error(err)
-		return nil
-	}
-	secret, err := clientset.CoreV1().Secrets(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		log.Error(err)
 		return nil
