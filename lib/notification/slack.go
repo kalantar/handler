@@ -84,7 +84,8 @@ func (t *SlackTask) postNotification(e *experiment.Experiment) error {
 		t.With.Channel,
 		slack.MsgOptionBlocks(slack.NewSectionBlock(&slack.TextBlockObject{
 			Type: slack.MarkdownType,
-			Text: Bold(Name(e)),
+			// Text: Bold(Name(e)),
+			Text: Bold(string(e.Spec.Strategy.TestingPattern) + " experiment on " + e.Spec.Target),
 		}, nil, nil)),
 		slack.MsgOptionAttachments(slack.Attachment{
 			Blocks: slack.Blocks{
@@ -107,18 +108,19 @@ func (t *SlackTask) postNotification(e *experiment.Experiment) error {
 // SlackMessage constructs the slack message to post
 func SlackMessage(e *experiment.Experiment) string {
 	msg := []string{
-		"Type: " + Italic(string(e.Spec.Strategy.TestingPattern)),
-		"Target: " + Italic(e.Spec.Target),
-		"Versions: " + Italic(Versions(e)),
-		"Stage: " + Italic(Stage(e)),
-		"Winner: " + Italic(Winner(e)),
+		// Bold("Type: ") + Italic(string(e.Spec.Strategy.TestingPattern)),
+		// Bold("Target: ") + Italic(e.Spec.Target),
+		Bold("Name:") + Space + Italic(Name(e)),
+		Bold("Versions:") + Space + Italic(Versions(e)),
+		Bold("Stage:") + Space + Italic(Stage(e)),
+		Bold("Winner:") + Space + Italic(Winner(e)),
 	}
 
 	if Failed(e) {
-		msg = append(msg, "Failed: "+Italic("true"))
+		msg = append(msg, Bold("Failed:")+Space+Italic("true"))
 	}
 
-	return strings.Join(msg, NewLine())
+	return strings.Join(msg, NewLine)
 }
 
 // Name returns the name of the experiment in the form namespace/name
@@ -179,10 +181,12 @@ func Italic(text string) string {
 	return "_" + text + "_"
 }
 
-// NewLine is a newline character
-func NewLine() string {
-	return "\n"
-}
+const (
+	// NewLine is a newline character
+	NewLine string = "\n"
+	// Space is a space character
+	Space string = " "
+)
 
 func (t *SlackTask) getToken() *string {
 	// get secret namespace and name

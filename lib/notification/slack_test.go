@@ -57,8 +57,8 @@ func TestExperiment(t *testing.T) {
 		assert.NoError(t, err)
 		msg := SlackMessage(exp)
 		assert.Contains(t, Name(exp), tc.expectedName)
-		assert.Contains(t, msg, "Versions: _"+tc.expectedVersions+"_\n")
-		assert.Contains(t, msg, "Winner: _"+tc.expectedWinner+"_")
+		assert.Contains(t, msg, "*Versions:* _"+tc.expectedVersions+"_\n")
+		assert.Contains(t, msg, "*Winner:* _"+tc.expectedWinner+"_")
 		if tc.expectedFailure {
 			assert.Contains(t, msg, "Failed")
 		}
