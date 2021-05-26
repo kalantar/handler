@@ -10,7 +10,9 @@ import (
 )
 
 const (
-	LIBRARY string = "notification"
+
+	// LibraryName is the name of the task library this package implements
+	LibraryName string = "notification"
 )
 
 var log *logrus.Logger
@@ -22,7 +24,7 @@ func init() {
 // MakeTask constructs a Task from a TaskMeta or returns an error if any.
 func MakeTask(t *v2alpha2.TaskSpec) (base.Task, error) {
 	switch t.Task {
-	case LIBRARY + "/" + SLACK_TASK:
+	case LibraryName + "/" + SlackTaskName:
 		return MakeSlackTask(t)
 	// add additional tasks here options here
 	default:

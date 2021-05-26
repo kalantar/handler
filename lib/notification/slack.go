@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	SLACK_TASK     string = "slack"
-	SLACK_ENDPOINT string = "https://slack.com/api/chat.postMessage"
+	// SlackTaskName is the name of the task this file implements
+	SlackTaskName string = "slack"
 )
 
 // SlackTaskInputs is the object corresponding to the expcted inputs to the task
@@ -36,8 +36,8 @@ type SlackTask struct {
 
 // MakeSlackTask converts an sampletask spec into an base.Task.
 func MakeSlackTask(t *v2alpha2.TaskSpec) (base.Task, error) {
-	if t.Task != LIBRARY+"/"+SLACK_TASK {
-		return nil, errors.New(fmt.Sprintf("library and task need to be '%s' and '%s'", LIBRARY, SLACK_TASK))
+	if t.Task != LibraryName+"/"+SlackTaskName {
+		return nil, fmt.Errorf("library and task need to be '%s' and '%s'", LibraryName, SlackTaskName)
 	}
 	var jsonBytes []byte
 	var task base.Task
@@ -104,6 +104,7 @@ func (t *SlackTask) postNotification(e *experiment.Experiment) error {
 	return err
 }
 
+// SlackMessage constructs the slack message to post
 func SlackMessage(e *experiment.Experiment) string {
 	msg := []string{
 		"Type: " + Italic(string(e.Spec.Strategy.TestingPattern)),
@@ -120,6 +121,7 @@ func SlackMessage(e *experiment.Experiment) string {
 	return strings.Join(msg, NewLine())
 }
 
+// Name returns the name of the experiment in the form namespace/name
 func Name(e *experiment.Experiment) string {
 	ns := e.Namespace
 	if len(ns) == 0 {
@@ -128,6 +130,7 @@ func Name(e *experiment.Experiment) string {
 	return ns + "/" + e.Name
 }
 
+// Versions returns a comma separated list of version names
 func Versions(e *experiment.Experiment) string {
 	versions := make([]string, 0)
 	if e.Spec.VersionInfo != nil {
@@ -139,6 +142,7 @@ func Versions(e *experiment.Experiment) string {
 	return strings.Join(versions, ", ")
 }
 
+// Stage returns the stage (status.stage) of an experiment
 func Stage(e *experiment.Experiment) string {
 	stage := v2alpha2.ExperimentStageWaiting
 	if e.Status.Stage != nil {
@@ -147,6 +151,7 @@ func Stage(e *experiment.Experiment) string {
 	return string(stage)
 }
 
+// Winner returns the name of the winning version, if one. Otherwise "not found"
 func Winner(e *experiment.Experiment) string {
 	winner := "not found"
 	if e.Status.Analysis != nil &&
@@ -158,19 +163,23 @@ func Winner(e *experiment.Experiment) string {
 	return winner
 }
 
+// Failed returns true if the experiment has failed; false otherwise
 func Failed(e *experiment.Experiment) bool {
 	// use !.. IsFalse() to allow undefined value => true
 	return !e.Status.GetCondition(v2alpha2.ExperimentConditionExperimentFailed).IsFalse()
 }
 
+// Bold formats a string as bold in markdown
 func Bold(text string) string {
 	return "*" + text + "*"
 }
 
+// Italic formats a string as italic in markdown
 func Italic(text string) string {
 	return "_" + text + "_"
 }
 
+// NewLine is a newline character
 func NewLine() string {
 	return "\n"
 }

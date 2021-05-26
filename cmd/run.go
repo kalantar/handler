@@ -47,7 +47,7 @@ Loop:
 				if action[i], err = knative.MakeTask(&actionSpec[i]); err != nil {
 					break Loop
 				}
-			case notification.LIBRARY:
+			case notification.LibraryName:
 				if action[i], err = notification.MakeTask(&actionSpec[i]); err != nil {
 					break Loop
 				}

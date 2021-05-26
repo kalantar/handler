@@ -15,7 +15,7 @@ func TestMakeTask(t *testing.T) {
 	channel, _ := json.Marshal("channel")
 	secret, _ := json.Marshal("default/slack-secret")
 	task, err := MakeTask(&v2alpha2.TaskSpec{
-		Task: LIBRARY + "/" + SLACK_TASK,
+		Task: LibraryName + "/" + SlackTaskName,
 		With: map[string]apiextensionsv1.JSON{
 			"channel": {Raw: channel},
 			"secret":  {Raw: secret},
@@ -37,7 +37,7 @@ type test struct {
 }
 
 const (
-	WINNER_NOT_FOUND string = "not found"
+	winnerNotFound string = "not found"
 )
 
 // table driven tests
@@ -45,9 +45,9 @@ var tests = []test{
 	// Conformance Test (1 versions), success, winner
 	{fileName: "slack1.yaml", expectedName: "default/conformance-exp", expectedVersions: "productpage-v1", expectedStage: "Completed", expectedWinner: "productpage-v1", expectedFailure: false},
 	// A/B test  (2 versions), failed
-	{fileName: "slack2.yaml", expectedName: "default/quickstart-exp", expectedVersions: "productpage-v1, productpage-v2", expectedStage: "Completed", expectedWinner: WINNER_NOT_FOUND, expectedFailure: false},
+	{fileName: "slack2.yaml", expectedName: "default/quickstart-exp", expectedVersions: "productpage-v1, productpage-v2", expectedStage: "Completed", expectedWinner: winnerNotFound, expectedFailure: false},
 	// A/B/n Test (3 versions), --> no analysis (winner); no failure, no stage
-	{fileName: "slack3.yaml", expectedName: "default/abn-exp", expectedVersions: "productpage-v1, productpage-v2, productpage-v3", expectedStage: "Waiting", expectedWinner: WINNER_NOT_FOUND, expectedFailure: false},
+	{fileName: "slack3.yaml", expectedName: "default/abn-exp", expectedVersions: "productpage-v1, productpage-v2, productpage-v3", expectedStage: "Waiting", expectedWinner: winnerNotFound, expectedFailure: false},
 }
 
 func TestExperiment(t *testing.T) {
