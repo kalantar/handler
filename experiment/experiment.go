@@ -3,13 +3,18 @@ package experiment
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
 	iter8 "github.com/iter8-tools/etc3/api/v2alpha2"
 	"github.com/iter8-tools/handler/base"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 var log *logrus.Logger
@@ -51,6 +56,7 @@ func GetExperimentFromContext(ctx context.Context) (*Experiment, error) {
 	return nil, errors.New("context has no experiment key")
 }
 
+// DEPRECATED. Use tags.Interpolate in base package instead
 // Interpolate interpolates input arguments based on tags of the version recommended for promotion in the experiment.
 func (exp *Experiment) Interpolate(inputArgs []string) ([]string, error) {
 	var recommendedBaseline string
@@ -60,7 +66,7 @@ func (exp *Experiment) Interpolate(inputArgs []string) ([]string, error) {
 		var versionDetail *iter8.VersionDetail
 		if versionDetail, err = exp.GetVersionDetail(recommendedBaseline); err == nil {
 			// get the tags
-			tags := base.Tags{M: make(map[string]string)}
+			tags := base.Tags{M: make(map[string]interface{})}
 			tags.M["name"] = versionDetail.Name
 			for i := 0; i < len(versionDetail.Variables); i++ {
 				tags.M[versionDetail.Variables[i].Name] = versionDetail.Variables[i].Value
@@ -76,4 +82,41 @@ func (exp *Experiment) Interpolate(inputArgs []string) ([]string, error) {
 		}
 	}
 	return args, err
+}
+
+func (e *Experiment) ToMap() (map[string]interface{}, error) {
+	// convert unstructured object to JSON object
+	expJSON, err := json.Marshal(e)
+	if err != nil {
+		log.Error(err, "Unable to convert experiment to JSON")
+		return nil, err
+	}
+
+	// convert JSON object to Go map
+	expObj := make(map[string]interface{})
+	err = json.Unmarshal(expJSON, &expObj)
+	if err != nil {
+		log.Error(err, "Unable to convert JSON to object")
+		return nil, err
+	}
+	return expObj, nil
+}
+
+// GetSecret retrieves a secret from the kubernetes cluster
+func GetSecret(namespacedname string) (*corev1.Secret, error) {
+	// get secret namespace and name
+	namespace := viper.GetViper().GetString("experiment_namespace")
+	var name string
+	nn := strings.Split(namespacedname, "/")
+	if len(nn) == 1 {
+		name = nn[0]
+	} else {
+		namespace = nn[0]
+		name = nn[1]
+	}
+	log.Trace("getSecret", "namespace", namespace, "name", name)
+
+	secret := corev1.Secret{}
+	err := GetTypedObject(&types.NamespacedName{Namespace: namespace, Name: name}, &secret)
+	return &secret, err
 }

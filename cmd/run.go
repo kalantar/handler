@@ -40,7 +40,7 @@ Loop:
 	for i := 0; i < len(actionSpec); i++ {
 		if actionSpecSubstr := strings.Split(actionSpec[i].Task, "/"); len(actionSpecSubstr) == 2 {
 			switch actionSpecSubstr[0] {
-			case "common":
+			case common.LibraryName:
 				if action[i], err = common.MakeTask(&actionSpec[i]); err != nil {
 					break Loop
 				}

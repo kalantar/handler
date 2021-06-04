@@ -95,6 +95,18 @@ func TestInterpolate(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestInterpolateWithExperiment(t *testing.T) {
+	exp, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment6.yaml")).Build()
+	assert.NoError(t, err)
+	e, err := exp.ToMap()
+	assert.NoError(t, err)
+	tags := base.NewTags().With("this", e).WithRecommendedVersionForPromotion(&exp.Experiment)
+	str := "{{.this.metadata.namespace}} {{.revision}}"
+	v, err := tags.Interpolate(&str)
+	assert.NoError(t, err)
+	assert.Equal(t, "default revision1", v)
+}
+
 // func TestInterpolateWithoutHandlerStanza(t *testing.T) {
 // 	var e *Experiment = &Experiment{}
 // 	assert.NoError(t, e.interpolate())

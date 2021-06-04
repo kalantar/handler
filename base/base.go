@@ -6,8 +6,10 @@ import (
 	"errors"
 	"html/template"
 
+	"github.com/iter8-tools/etc3/api/v2alpha2"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/sirupsen/logrus"
+	corev1 "k8s.io/api/core/v1"
 )
 
 var log *logrus.Logger
@@ -44,7 +46,68 @@ func (a *Action) Run(ctx context.Context) error {
 
 // Tags supports string extrapolation using tags.
 type Tags struct {
-	M map[string]string
+	M map[string]interface{}
+}
+
+// NewTags creates an empty instance of Tags
+func NewTags() Tags {
+	return Tags{M: make(map[string]interface{})}
+}
+
+// WithSecret adds the fields in secret to tags
+func (tags Tags) WithSecret(secret *corev1.Secret) Tags {
+	if secret != nil {
+		for n, v := range secret.Data {
+			tags.M[n] = string(v)
+		}
+	}
+	return tags
+}
+
+// With adds obj to tags
+func (tags Tags) With(label string, obj interface{}) Tags {
+	if obj != nil {
+		tags.M[label] = obj
+	}
+	return tags
+}
+
+// WithRecommendedVersionForPromotion
+func (tags Tags) WithRecommendedVersionForPromotion(exp *v2alpha2.Experiment) Tags {
+	if exp == nil || exp.Status.VersionRecommendedForPromotion == nil {
+		log.Warn("no version recommended for promotion")
+		return tags
+	}
+
+	versionRecommendedForPromotion := *exp.Status.VersionRecommendedForPromotion
+	if exp.Spec.VersionInfo == nil {
+		log.Warnf("No version details found for version recommended for promotion: %s", versionRecommendedForPromotion)
+		return tags
+	}
+
+	var versionDetail *v2alpha2.VersionDetail = nil
+	if exp.Spec.VersionInfo.Baseline.Name == versionRecommendedForPromotion {
+		versionDetail = &exp.Spec.VersionInfo.Baseline
+	} else {
+		for _, v := range exp.Spec.VersionInfo.Candidates {
+			if v.Name == versionRecommendedForPromotion {
+				versionDetail = &v
+				break
+			}
+		}
+	}
+	if versionDetail == nil {
+		log.Warnf("No version details found for version recommended for promotion: %s", versionRecommendedForPromotion)
+		return tags
+	}
+
+	// get the variable values from the (recommended) versionDetail
+	tags.M["name"] = versionDetail.Name
+	for _, v := range versionDetail.Variables {
+		tags.M[v.Name] = v.Value
+	}
+
+	return tags
 }
 
 // Interpolate str using tags.

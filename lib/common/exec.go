@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,6 +10,11 @@ import (
 	"github.com/iter8-tools/etc3/api/v2alpha2"
 	"github.com/iter8-tools/handler/base"
 	"github.com/iter8-tools/handler/experiment"
+)
+
+const (
+	// ExecTaskName is the name of this file implements
+	ExecTaskName string = "exec"
 )
 
 // ExecInputs contain the name and arguments of the command to be executed.
@@ -22,9 +26,8 @@ type ExecInputs struct {
 
 // ExecTask encapsulates a command that can be executed.
 type ExecTask struct {
-	Library string     `json:"library" yaml:"library"`
-	Task    string     `json:"task" yaml:"task"`
-	With    ExecInputs `json:"with" yaml:"with"`
+	base.TaskMeta `json:",inline" yaml:",inline"`
+	With          ExecInputs `json:"with" yaml:"with"`
 }
 
 // Run the command.
@@ -60,8 +63,8 @@ func (t *ExecTask) Run(ctx context.Context) error {
 
 // MakeExec converts an exec task spec into an exec task.
 func MakeExec(t *v2alpha2.TaskSpec) (base.Task, error) {
-	if t.Task != "common/exec" {
-		return nil, errors.New("library and task need to be 'common' and 'exec'")
+	if t.Task != LibraryName+"/"+ExecTaskName {
+		return nil, fmt.Errorf("library and task need to be '%s' and '%s'", LibraryName, ExecTaskName)
 	}
 	var err error
 	var jsonBytes []byte

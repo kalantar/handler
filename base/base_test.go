@@ -5,6 +5,8 @@ import (
 
 	"github.com/iter8-tools/handler/utils"
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func init() {
@@ -12,27 +14,58 @@ func init() {
 }
 
 func TestInterpolate(t *testing.T) {
-	tags := Tags{
-		M: map[string]string{"revision": "revision1", "container": "super-container"},
+	tags := NewTags().
+		With("name", "tester").
+		With("revision", "revision1").
+		With("container", "super-container")
+
+	// success cases
+	inputs := []string{
+		// `hello {{index . "name"}}`,
+		// "hello {{index .name}}",
+		"hello {{.name}}",
+		"hello {{.name}}{{.other}}",
 	}
-	str := `hello {{ index . "revision" }} world`
+	for _, str := range inputs {
+		interpolated, err := tags.Interpolate(&str)
+		assert.NoError(t, err)
+		assert.Equal(t, "hello tester", interpolated)
+	}
+
+	// failure cases
+	inputs = []string{
+		// bad braces,
+		"hello {{{index .name}}",
+		// missing '.'
+		"hello {{name}}",
+	}
+	for _, str := range inputs {
+		_, err := tags.Interpolate(&str)
+		assert.Error(t, err)
+	}
+
+	// empty tags (success cases)
+	str := "hello {{.name}}"
+	tags = NewTags()
 	interpolated, err := tags.Interpolate(&str)
 	assert.NoError(t, err)
-	assert.Equal(t, "hello revision1 world", interpolated)
+	assert.Equal(t, "hello ", interpolated)
 
-	tags = Tags{}
+	// secret
+	secret := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "secret",
+			Namespace: "default",
+		},
+		Data: map[string][]byte{
+			"secretName": []byte("tester"),
+		},
+	}
+
+	str = "hello {{.secretName}}"
+	tags = NewTags().WithSecret(&secret)
+	assert.Contains(t, tags.M, "secretName")
 	interpolated, err = tags.Interpolate(&str)
 	assert.NoError(t, err)
-	assert.Equal(t, str, interpolated)
-
-	tags = Tags{
-		M: map[string]string{"revision": "revision1", "container": "super-container"},
-	}
-	str = `hello {{{ romeo . "revision" alpha tango }} world`
-	_, err = tags.Interpolate(&str)
-	assert.Error(t, err)
-
-	str = `hello {{ index . 0 }} world`
-	_, err = tags.Interpolate(&str)
-	assert.Error(t, err)
+	assert.Equal(t, "hello tester", interpolated)
 }

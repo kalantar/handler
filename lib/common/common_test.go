@@ -62,3 +62,16 @@ func TestExecTaskNoInterpolation(t *testing.T) {
 	exp, err := (&experiment.Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment10.yaml")).Build()
 	task.Run(context.WithValue(context.Background(), base.ContextKey("experiment"), exp))
 }
+
+func TestMakeBashTask(t *testing.T) {
+	script, _ := json.Marshal("echo hello")
+	task, err := MakeTask(&v2alpha2.TaskSpec{
+		Task: LibraryName + "/" + BashTaskName,
+		With: map[string]apiextensionsv1.JSON{
+			"script": {Raw: script},
+		},
+	})
+	assert.NotEmpty(t, task)
+	assert.NoError(t, err)
+	assert.Equal(t, "echo hello", task.(*BashTask).With.Script)
+}

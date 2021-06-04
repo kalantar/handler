@@ -9,6 +9,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	// LibraryName is the name of this task library
+	LibraryName string = "common"
+)
+
 var log *logrus.Logger
 
 func init() {
@@ -18,8 +23,10 @@ func init() {
 // MakeTask constructs a Task from a TaskSpec or returns an error if any.
 func MakeTask(t *v2alpha2.TaskSpec) (base.Task, error) {
 	switch t.Task {
-	case "common/exec":
+	case LibraryName + "/" + ExecTaskName:
 		return MakeExec(t)
+	case LibraryName + "/" + BashTaskName:
+		return MakeBashTask(t)
 	default:
 		return nil, errors.New("Unknown task: " + t.Task)
 	}
