@@ -20,7 +20,9 @@ func (b *Builder) FromFile(filePath string) *Builder {
 			b.exp = exp
 			return b
 		}
+		log.Error(err)
 	}
+	log.Error(err)
 	b.err = errors.New("cannot build experiment from file")
 	return b
 }

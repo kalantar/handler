@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"encoding/json"
+	"path/filepath"
 	"testing"
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
@@ -74,4 +75,17 @@ func TestMakeBashTask(t *testing.T) {
 	assert.NotEmpty(t, task)
 	assert.NoError(t, err)
 	assert.Equal(t, "echo hello", task.(*BashTask).With.Script)
+}
+
+func TestBashRun(t *testing.T) {
+	exp, err := (&experiment.Builder{}).FromFile(filepath.Join("..", "..", "testdata", "common", "bashexperiment.yaml")).Build()
+	assert.NoError(t, err)
+	actionSpec, err := exp.GetActionSpec("start")
+	assert.NoError(t, err)
+	// action, err := GetAction(exp, actionSpec)
+	action, err := MakeTask(&actionSpec[0])
+	assert.NoError(t, err)
+	ctx := context.WithValue(context.Background(), base.ContextKey("experiment"), exp)
+	err = action.Run(ctx)
+	assert.NoError(t, err)
 }
