@@ -1,8 +1,12 @@
 package base
 
 import (
+	"io/ioutil"
+	"path/filepath"
 	"testing"
 
+	"github.com/ghodss/yaml"
+	"github.com/iter8-tools/etc3/api/v2alpha2"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -68,4 +72,15 @@ func TestInterpolate(t *testing.T) {
 	interpolated, err = tags.Interpolate(&str)
 	assert.NoError(t, err)
 	assert.Equal(t, "hello tester", interpolated)
+}
+
+func TestWithVersionRecommendedForPromotion(t *testing.T) {
+	var data []byte
+	data, err := ioutil.ReadFile(filepath.Join("..", "testdata", "experiment1.yaml"))
+	assert.NoError(t, err)
+	exp := &v2alpha2.Experiment{}
+	err = yaml.Unmarshal(data, exp)
+	assert.NoError(t, err)
+	tags := NewTags().WithRecommendedVersionForPromotion(exp)
+	assert.Equal(t, "revision1", tags.M["revision"])
 }

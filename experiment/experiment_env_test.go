@@ -7,6 +7,8 @@ import (
 	"github.com/iter8-tools/handler/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -84,5 +86,27 @@ var _ = Describe("Experiment's handler field", func() {
 		// 	err = exp.Run("start")
 		// 	Expect(err).To(HaveOccurred())
 		// })
+	})
+})
+
+var _ = Describe("GetSecret", func() {
+	Context("When call GetSecret for a valid secret", func() {
+		It("should read the secret", func() {
+			By("Creating a secret")
+			secret := corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-secret",
+					Namespace: "default",
+				},
+				Data: map[string][]byte{
+					"secretName": []byte("tester"),
+				},
+			}
+			k8sClient.Create(context.Background(), &secret)
+			By("Calling GetSecret")
+			s, err := experiment.GetSecret("default/test-secret")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(string(s.Data["secretName"])).To(Equal("tester"))
+		})
 	})
 })
