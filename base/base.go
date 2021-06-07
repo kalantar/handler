@@ -72,7 +72,7 @@ func (tags Tags) With(label string, obj interface{}) Tags {
 	return tags
 }
 
-// WithRecommendedVersionForPromotion
+// WithRecommendedVersionForPromotion adds variables from versionDetail of version recommended for promotion
 func (tags Tags) WithRecommendedVersionForPromotion(exp *v2alpha2.Experiment) Tags {
 	if exp == nil || exp.Status.VersionRecommendedForPromotion == nil {
 		log.Warn("no version recommended for promotion")

@@ -56,8 +56,8 @@ func GetExperimentFromContext(ctx context.Context) (*Experiment, error) {
 	return nil, errors.New("context has no experiment key")
 }
 
-// DEPRECATED. Use tags.Interpolate in base package instead
 // Interpolate interpolates input arguments based on tags of the version recommended for promotion in the experiment.
+// DEPRECATED. Use tags.Interpolate in base package instead
 func (exp *Experiment) Interpolate(inputArgs []string) ([]string, error) {
 	var recommendedBaseline string
 	var args []string
@@ -84,9 +84,10 @@ func (exp *Experiment) Interpolate(inputArgs []string) ([]string, error) {
 	return args, err
 }
 
-func (e *Experiment) ToMap() (map[string]interface{}, error) {
+// ToMap converts exp.Experiment to  a map[string]interface{}
+func (exp *Experiment) ToMap() (map[string]interface{}, error) {
 	// convert unstructured object to JSON object
-	expJSON, err := json.Marshal(e)
+	expJSON, err := json.Marshal(exp.Experiment)
 	if err != nil {
 		log.Error(err, "Unable to convert experiment to JSON")
 		return nil, err
