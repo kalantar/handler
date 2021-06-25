@@ -26,3 +26,4 @@ change-template: '- #$NUMBER: $TITLE'
 template: |
   ## What’s Changed
   $CHANGES
+  $NEXT_PATCH_VERSION
