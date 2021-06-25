@@ -1,4 +1,3 @@
-name-template: 'Official release of Iter8 handler version $NEXT_PATCH_VERSION'
 tag-template: 'v$NEXT_PATCH_VERSION'
 categories:
   - title: '🚀 Features'
@@ -24,6 +23,5 @@ categories:
       - 'tests'
 change-template: '- #$NUMBER: $TITLE'
 template: |
-  ## What’s Changed
+  ## What’s Changed Since Last Release $NEXT_PATCH_VERSION
   $CHANGES
-  $NEXT_PATCH_VERSION
