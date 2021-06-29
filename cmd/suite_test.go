@@ -3,7 +3,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/base/experiment"
 	"github.com/iter8-tools/handler/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

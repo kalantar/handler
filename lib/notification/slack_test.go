@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
-	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/base/experiment"
 	"github.com/stretchr/testify/assert"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )

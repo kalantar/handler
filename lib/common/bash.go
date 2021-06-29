@@ -9,7 +9,6 @@ import (
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
 	"github.com/iter8-tools/handler/base"
-	"github.com/iter8-tools/handler/experiment"
 )
 
 const (
@@ -48,27 +47,8 @@ func MakeBashTask(t *v2alpha2.TaskSpec) (base.Task, error) {
 
 // Run the command.
 func (t *BashTask) Run(ctx context.Context) error {
-	exp, err := experiment.GetExperimentFromContext(ctx)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	log.Trace("experiment", exp)
-
-	obj, err := exp.ToMap()
-	if err != nil {
-		// error already logged by ToMap()
-		// don't log it again
-		return err
-	}
-
-	// prepare for interpolation; add experiment as tag
-	// Note that if versionRecommendedForPromotion is not set or there is no version corresponding to it,
-	// then some placeholders may not be replaced
-	tags := base.NewTags().
-		With("this", obj).
-		WithRecommendedVersionForPromotion(&exp.Experiment)
-	log.Tracef("tags: %v", tags)
+	tags := base.GetDefaultTags(ctx)
+	log.Tracef("tags: %v", *tags)
 
 	// interpolate - replaces placeholders in the script with values
 	script, err := tags.Interpolate(&t.With.Script)

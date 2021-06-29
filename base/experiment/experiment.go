@@ -9,7 +9,7 @@ import (
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
 	iter8 "github.com/iter8-tools/etc3/api/v2alpha2"
-	"github.com/iter8-tools/handler/base"
+	"github.com/iter8-tools/handler/base/interpolation"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -43,8 +43,7 @@ func (b *Builder) Build() (*Experiment, error) {
 
 // GetExperimentFromContext gets the experiment object from given context.
 func GetExperimentFromContext(ctx context.Context) (*Experiment, error) {
-	//	ctx := context.WithValue(context.Background(), base.ContextKey("experiment"), e)
-	if v := ctx.Value(base.ContextKey("experiment")); v != nil {
+	if v := ctx.Value(utils.ContextKey("experiment")); v != nil {
 		log.Debug("found experiment")
 		var e *Experiment
 		var ok bool
@@ -66,7 +65,7 @@ func (exp *Experiment) Interpolate(inputArgs []string) ([]string, error) {
 		var versionDetail *iter8.VersionDetail
 		if versionDetail, err = exp.GetVersionDetail(recommendedBaseline); err == nil {
 			// get the tags
-			tags := base.Tags{M: make(map[string]interface{})}
+			tags := interpolation.Tags{M: make(map[string]interface{})}
 			tags.M["name"] = versionDetail.Name
 			for i := 0; i < len(versionDetail.Variables); i++ {
 				tags.M[versionDetail.Variables[i].Name] = versionDetail.Variables[i].Value

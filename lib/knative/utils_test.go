@@ -8,7 +8,7 @@ import (
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/ghodss/yaml"
-	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/base/experiment"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/stretchr/testify/assert"
 )

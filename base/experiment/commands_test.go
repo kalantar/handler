@@ -13,7 +13,7 @@ func TestGetActionSpec(t *testing.T) {
 	_, err := nilExp.GetActionSpec("stay-calm")
 	assert.Error(t, err)
 
-	exp, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment8.yaml")).Build()
+	exp, err := (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment8.yaml")).Build()
 	assert.NoError(t, err)
 	_, err = exp.GetActionSpec("stay-calm")
 	assert.Error(t, err)
@@ -22,14 +22,14 @@ func TestGetActionSpec(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, a)
 
-	exp, err = (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment4.yaml")).Build()
+	exp, err = (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment4.yaml")).Build()
 	assert.NoError(t, err)
 	_, err = exp.GetActionSpec("start")
 	assert.Error(t, err)
 }
 
 func TestUpdateVariable(t *testing.T) {
-	exp, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment6.yaml")).Build()
+	exp, err := (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment6.yaml")).Build()
 	assert.NoError(t, err)
 
 	var v *v2alpha2.VersionDetail = nil
@@ -46,7 +46,7 @@ func TestUpdateVariable(t *testing.T) {
 }
 
 func TestGetVersionDetail(t *testing.T) {
-	exp, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment6.yaml")).Build()
+	exp, err := (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment6.yaml")).Build()
 	assert.NoError(t, err)
 
 	v, err := exp.GetVersionDetail("default")
@@ -68,7 +68,7 @@ func TestGetVersionDetail(t *testing.T) {
 }
 
 func TestFindVariableVersionDetail(t *testing.T) {
-	exp, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment6.yaml")).Build()
+	exp, err := (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment6.yaml")).Build()
 	assert.NoError(t, err)
 
 	var v *v2alpha2.VersionDetail = nil

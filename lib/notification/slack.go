@@ -9,7 +9,7 @@ import (
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
 	"github.com/iter8-tools/handler/base"
-	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/base/experiment"
 	"github.com/slack-go/slack"
 	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"

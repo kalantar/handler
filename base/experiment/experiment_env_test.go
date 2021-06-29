@@ -3,7 +3,7 @@ package experiment_test
 import (
 	"context"
 
-	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/base/experiment"
 	"github.com/iter8-tools/handler/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,7 +18,7 @@ var _ = Describe("Experiment's handler field", func() {
 		var err error
 		It("should retrieve handler info properly", func() {
 			By("reading the experiment from file")
-			exp, err = (&experiment.Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment1.yaml")).Build()
+			exp, err = (&experiment.Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment1.yaml")).Build()
 			Expect(err).ToNot(HaveOccurred())
 
 			By("creating experiment in cluster")
@@ -55,7 +55,7 @@ var _ = Describe("Experiment's handler field", func() {
 
 		// It("should run handler", func() {
 		// 	By("reading the experiment from file")
-		// 	exp, err = (&experiment.Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment6.yaml")).Build()
+		// 	exp, err = (&experiment.Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment6.yaml")).Build()
 		// 	Expect(err).ToNot(HaveOccurred())
 
 		// 	By("creating experiment in cluster")
@@ -79,7 +79,7 @@ var _ = Describe("Experiment's handler field", func() {
 
 		// It("should deal with extrapolation errors", func() {
 		// 	By("reading the experiment from file")
-		// 	exp, err = (&experiment.Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment7.yaml")).Build()
+		// 	exp, err = (&experiment.Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment7.yaml")).Build()
 		// 	Expect(err).ToNot(HaveOccurred())
 
 		// 	By("running and gracefully exiting")

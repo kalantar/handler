@@ -5,29 +5,29 @@ import (
 	"testing"
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
-	"github.com/iter8-tools/handler/base"
+	"github.com/iter8-tools/handler/base/interpolation"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestBuildErrorGarbageYAML(t *testing.T) {
-	_, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/garbage.yaml")).Build()
+	_, err := (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/garbage.yaml")).Build()
 	assert.Error(t, err)
 }
 
 func TestInvalidAction(t *testing.T) {
-	_, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment3.yaml")).Build()
+	_, err := (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment3.yaml")).Build()
 	assert.Error(t, err)
 }
 
 func TestInvalidActions(t *testing.T) {
-	_, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment5.yaml")).Build()
+	_, err := (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment5.yaml")).Build()
 	assert.Error(t, err)
 }
 
 func TestStringAction(t *testing.T) {
-	_, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment9.yaml")).Build()
+	_, err := (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment9.yaml")).Build()
 	assert.Error(t, err)
 }
 
@@ -35,13 +35,13 @@ func TestGetRecommendedBaseline(t *testing.T) {
 	var err error
 	var exp *Experiment
 	var b string
-	exp, err = (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment6.yaml")).Build()
+	exp, err = (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment6.yaml")).Build()
 	assert.NoError(t, err)
 	b, err = exp.GetVersionRecommendedForPromotion()
 	assert.NoError(t, err)
 	assert.Equal(t, "default", b)
 
-	exp, err = (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment2.yaml")).Build()
+	exp, err = (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment2.yaml")).Build()
 	assert.NoError(t, err)
 	b, err = exp.GetVersionRecommendedForPromotion()
 	assert.Error(t, err)
@@ -52,14 +52,14 @@ func TestGetRecommendedBaseline(t *testing.T) {
 }
 
 func TestGetExperimentFromContext(t *testing.T) {
-	ctx := context.WithValue(context.Background(), base.ContextKey("experiment"), "hello world")
+	ctx := context.WithValue(context.Background(), utils.ContextKey("experiment"), "hello world")
 	_, err := GetExperimentFromContext(ctx)
 	assert.Error(t, err)
 
 	_, err = GetExperimentFromContext(context.Background())
 	assert.Error(t, err)
 
-	ctx = context.WithValue(context.Background(), base.ContextKey("experiment"), &Experiment{
+	ctx = context.WithValue(context.Background(), utils.ContextKey("experiment"), &Experiment{
 		Experiment: v2alpha2.Experiment{
 			TypeMeta:   v1.TypeMeta{},
 			ObjectMeta: v1.ObjectMeta{},
@@ -77,7 +77,7 @@ func TestInterpolate(t *testing.T) {
 	var err error
 	var exp *Experiment
 	var b string
-	exp, err = (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment6.yaml")).Build()
+	exp, err = (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment6.yaml")).Build()
 	assert.NoError(t, err)
 	b, err = exp.GetVersionRecommendedForPromotion()
 	assert.NoError(t, err)
@@ -96,11 +96,11 @@ func TestInterpolate(t *testing.T) {
 }
 
 func TestInterpolateWithExperiment(t *testing.T) {
-	exp, err := (&Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment6.yaml")).Build()
+	exp, err := (&Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment6.yaml")).Build()
 	assert.NoError(t, err)
 	e, err := exp.ToMap()
 	assert.NoError(t, err)
-	tags := base.NewTags().With("this", e).WithRecommendedVersionForPromotion(&exp.Experiment)
+	tags := interpolation.NewTags().With("this", e).WithRecommendedVersionForPromotion(&exp.Experiment)
 	str := "{{.this.metadata.namespace}} {{.revision}}"
 	v, err := tags.Interpolate(&str)
 	assert.NoError(t, err)

@@ -7,8 +7,7 @@ import (
 	"testing"
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
-	"github.com/iter8-tools/handler/base"
-	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/base/experiment"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/stretchr/testify/assert"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -30,7 +29,7 @@ func TestMakeTask(t *testing.T) {
 	log.Trace(task.(*ExecTask).With.Args)
 
 	exp, err := (&experiment.Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment10.yaml")).Build()
-	task.Run(context.WithValue(context.Background(), base.ContextKey("experiment"), exp))
+	task.Run(context.WithValue(context.Background(), utils.ContextKey("experiment"), exp))
 
 	task, err = MakeTask(&v2alpha2.TaskSpec{
 		Task: "common/run",
@@ -61,7 +60,7 @@ func TestExecTaskNoInterpolation(t *testing.T) {
 	log.Trace(task.(*ExecTask).With.Args)
 
 	exp, err := (&experiment.Builder{}).FromFile(utils.CompletePath("../../", "testdata/experiment10.yaml")).Build()
-	task.Run(context.WithValue(context.Background(), base.ContextKey("experiment"), exp))
+	task.Run(context.WithValue(context.Background(), utils.ContextKey("experiment"), exp))
 }
 
 func TestMakeBashTask(t *testing.T) {
@@ -85,7 +84,7 @@ func TestBashRun(t *testing.T) {
 	// action, err := GetAction(exp, actionSpec)
 	action, err := MakeTask(&actionSpec[0])
 	assert.NoError(t, err)
-	ctx := context.WithValue(context.Background(), base.ContextKey("experiment"), exp)
+	ctx := context.WithValue(context.Background(), utils.ContextKey("experiment"), exp)
 	err = action.Run(ctx)
 	assert.NoError(t, err)
 }

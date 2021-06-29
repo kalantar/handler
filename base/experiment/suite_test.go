@@ -3,7 +3,7 @@ package experiment_test
 import (
 	"testing"
 
-	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/base/experiment"
 	"github.com/iter8-tools/handler/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -35,7 +35,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(restConf).ToNot(BeNil())
 	// Install CRDs into the cluster
-	crdPath := utils.CompletePath("../", "testdata/crd/bases")
+	crdPath := utils.CompletePath("../../", "testdata/crd/bases")
 	_, err = envtest.InstallCRDs(restConf, envtest.CRDInstallOptions{Paths: []string{crdPath}})
 	Expect(err).ToNot(HaveOccurred())
 

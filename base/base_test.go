@@ -1,12 +1,15 @@
 package base
 
 import (
+	"context"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
 
 	"github.com/ghodss/yaml"
 	"github.com/iter8-tools/etc3/api/v2alpha2"
+	"github.com/iter8-tools/handler/base/experiment"
+	"github.com/iter8-tools/handler/base/interpolation"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -18,7 +21,7 @@ func init() {
 }
 
 func TestInterpolate(t *testing.T) {
-	tags := NewTags().
+	tags := interpolation.NewTags().
 		With("name", "tester").
 		With("revision", "revision1").
 		With("container", "super-container")
@@ -50,7 +53,7 @@ func TestInterpolate(t *testing.T) {
 
 	// empty tags (success cases)
 	str := "hello {{.name}}"
-	tags = NewTags()
+	tags = interpolation.NewTags()
 	interpolated, err := tags.Interpolate(&str)
 	assert.NoError(t, err)
 	assert.Equal(t, "hello ", interpolated)
@@ -67,11 +70,22 @@ func TestInterpolate(t *testing.T) {
 	}
 
 	str = "hello {{.secretName}}"
-	tags = NewTags().WithSecret(&secret)
+	tags = interpolation.NewTags().WithSecret(&secret)
 	assert.Contains(t, tags.M, "secretName")
 	interpolated, err = tags.Interpolate(&str)
 	assert.NoError(t, err)
 	assert.Equal(t, "hello tester", interpolated)
+}
+
+func TestInterpolationObject(t *testing.T) {
+	innerObj := map[string]interface{}{"inner": "innervalue"}
+	outerObj := map[string]interface{}{"outer": innerObj}
+	tags := interpolation.NewTags().With("object", outerObj)
+
+	str := "{{.object.outer.inner}}"
+	interpolated, err := tags.Interpolate(&str)
+	assert.NoError(t, err)
+	assert.Equal(t, "innervalue", interpolated)
 }
 
 func TestWithVersionRecommendedForPromotion(t *testing.T) {
@@ -81,7 +95,7 @@ func TestWithVersionRecommendedForPromotion(t *testing.T) {
 	exp := &v2alpha2.Experiment{}
 	err = yaml.Unmarshal(data, exp)
 	assert.NoError(t, err)
-	tags := NewTags().WithRecommendedVersionForPromotion(exp)
+	tags := interpolation.NewTags().WithRecommendedVersionForPromotion(exp)
 	assert.Equal(t, "revision1", tags.M["revision"])
 }
 
@@ -92,7 +106,35 @@ func TestWithOutVersionRecommendedForPromotion(t *testing.T) {
 	exp := &v2alpha2.Experiment{}
 	err = yaml.Unmarshal(data, exp)
 	assert.NoError(t, err)
-	tags := NewTags().WithRecommendedVersionForPromotion(exp)
+	tags := interpolation.NewTags().WithRecommendedVersionForPromotion(exp)
 	assert.NotContains(t, tags.M, "revision1")
 	// assert.Equal(t, "revision1", tags.M["revision"])
+}
+
+func TestWithExperiment(t *testing.T) {
+	exp, err := (&experiment.Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment1.yaml")).Build()
+	assert.NoError(t, err)
+	ctx := context.WithValue(context.Background(), utils.ContextKey("experiment"), exp)
+	tags := GetDefaultTags(ctx)
+
+	testStr := []string{
+		"{{.this.apiVersion}}",
+		"{{.this.metadata.name}}",
+		"{{.this.spec.duration.intervalSeconds}}",
+		"{{(index .this.spec.versionInfo.baseline.variables 0).value}}",
+		"{{.this.status.versionRecommendedForPromotion}}",
+	}
+	expectedOut := []string{
+		"iter8.tools/v2alpha2",
+		"sklearn-iris-experiment-1",
+		"15",
+		"revision1",
+		"default",
+	}
+
+	for i, in := range testStr {
+		out, err := tags.Interpolate(&in)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedOut[i], out)
+	}
 }

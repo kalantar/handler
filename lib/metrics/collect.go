@@ -21,7 +21,7 @@ import (
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
 	"github.com/iter8-tools/handler/base"
-	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/base/experiment"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
