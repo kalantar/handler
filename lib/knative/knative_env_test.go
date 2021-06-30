@@ -6,7 +6,6 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/iter8-tools/etc3/api/v2alpha2"
-	"github.com/iter8-tools/handler/base"
 	"github.com/iter8-tools/handler/experiment"
 	"github.com/iter8-tools/handler/utils"
 	. "github.com/onsi/ginkgo"
@@ -65,7 +64,7 @@ var _ = Describe("Knative library", func() {
 			}, exp2)).To(Succeed())
 
 			By("populating context with the experiment")
-			ctx := context.WithValue(context.Background(), base.ContextKey("experiment"), exp2)
+			ctx := context.WithValue(context.Background(), utils.ContextKey("experiment"), exp2)
 
 			By("creating an init-experiment task")
 			initExp := InitExperimentTask{
@@ -120,7 +119,7 @@ var _ = Describe("Knative library", func() {
 			}, exp2)).To(Succeed())
 
 			By("populating context with the experiment")
-			ctx := context.WithValue(context.Background(), base.ContextKey("experiment"), exp2)
+			ctx := context.WithValue(context.Background(), utils.ContextKey("experiment"), exp2)
 
 			By("creating an init-experiment task")
 			initExp := InitExperimentTask{

@@ -13,6 +13,7 @@ import (
 	"github.com/iter8-tools/handler/lib/knative"
 	"github.com/iter8-tools/handler/lib/metrics"
 	"github.com/iter8-tools/handler/lib/notification"
+	"github.com/iter8-tools/handler/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/types"
@@ -77,7 +78,7 @@ func run(cmd *cobra.Command, args []string) error {
 			if actionSpec, err = exp.GetActionSpec(action); err == nil {
 				var action base.Action
 				if action, err = GetAction(exp, actionSpec); err == nil {
-					ctx := context.WithValue(context.Background(), base.ContextKey("experiment"), exp)
+					ctx := context.WithValue(context.Background(), utils.ContextKey("experiment"), exp)
 					log.Trace("created context for experiment")
 					err = action.Run(ctx)
 					if err == nil {

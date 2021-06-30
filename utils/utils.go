@@ -36,6 +36,9 @@ func GetLogger() *logrus.Logger {
 	return log
 }
 
+// ContextKey is the type of key that will be used to index into context.
+type ContextKey string
+
 // CompletePath determines complete path of a file
 var CompletePath func(prefix string, suffix string) string = iter8utils.CompletePath
 

@@ -10,6 +10,7 @@ import (
 	"github.com/iter8-tools/etc3/api/v2alpha2"
 	"github.com/iter8-tools/handler/base"
 	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/interpolation"
 )
 
 const (
@@ -65,7 +66,7 @@ func (t *BashTask) Run(ctx context.Context) error {
 	// prepare for interpolation; add experiment as tag
 	// Note that if versionRecommendedForPromotion is not set or there is no version corresponding to it,
 	// then some placeholders may not be replaced
-	tags := base.NewTags().
+	tags := interpolation.NewTags().
 		With("this", obj).
 		WithRecommendedVersionForPromotion(&exp.Experiment)
 	log.Tracef("tags: %v", tags)

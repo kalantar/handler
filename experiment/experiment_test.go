@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
-	"github.com/iter8-tools/handler/base"
+	"github.com/iter8-tools/handler/interpolation"
 	"github.com/iter8-tools/handler/utils"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,14 +52,14 @@ func TestGetRecommendedBaseline(t *testing.T) {
 }
 
 func TestGetExperimentFromContext(t *testing.T) {
-	ctx := context.WithValue(context.Background(), base.ContextKey("experiment"), "hello world")
+	ctx := context.WithValue(context.Background(), utils.ContextKey("experiment"), "hello world")
 	_, err := GetExperimentFromContext(ctx)
 	assert.Error(t, err)
 
 	_, err = GetExperimentFromContext(context.Background())
 	assert.Error(t, err)
 
-	ctx = context.WithValue(context.Background(), base.ContextKey("experiment"), &Experiment{
+	ctx = context.WithValue(context.Background(), utils.ContextKey("experiment"), &Experiment{
 		Experiment: v2alpha2.Experiment{
 			TypeMeta:   v1.TypeMeta{},
 			ObjectMeta: v1.ObjectMeta{},
@@ -100,7 +100,7 @@ func TestInterpolateWithExperiment(t *testing.T) {
 	assert.NoError(t, err)
 	e, err := exp.ToMap()
 	assert.NoError(t, err)
-	tags := base.NewTags().With("this", e).WithRecommendedVersionForPromotion(&exp.Experiment)
+	tags := interpolation.NewTags().With("this", e).WithRecommendedVersionForPromotion(&exp.Experiment)
 	str := "{{.this.metadata.namespace}} {{.revision}}"
 	v, err := tags.Interpolate(&str)
 	assert.NoError(t, err)
