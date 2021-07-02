@@ -14,6 +14,7 @@ import (
 	"github.com/iter8-tools/etc3/api/v2alpha2"
 	"github.com/iter8-tools/handler/base"
 	"github.com/iter8-tools/handler/experiment"
+	"github.com/iter8-tools/handler/interpolation"
 )
 
 const (
@@ -56,7 +57,7 @@ func MakeHTTPRequestTask(t *v2alpha2.TaskSpec) (base.Task, error) {
 }
 
 func (t *HTTPRequestTask) prepareRequest(ctx context.Context) (*http.Request, error) {
-	tags := base.NewTags()
+	tags := interpolation.NewTags()
 	exp, err := experiment.GetExperimentFromContext(ctx)
 	if err != nil {
 		log.Error(err)

@@ -134,7 +134,7 @@ func TestMakeHttpRequestTask(t *testing.T) {
 
 	exp, err := (&experiment.Builder{}).FromFile(filepath.Join("..", "..", "testdata", "experiment1.yaml")).Build()
 	assert.NoError(t, err)
-	ctx := context.WithValue(context.Background(), base.ContextKey("experiment"), exp)
+	ctx := context.WithValue(context.Background(), utils.ContextKey("experiment"), exp)
 
 	req, err := task.(*HTTPRequestTask).prepareRequest(ctx)
 	assert.NotEmpty(t, task)
