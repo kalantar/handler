@@ -13,6 +13,7 @@ RUN go mod download
 COPY base/ base/
 COPY cmd/ cmd/
 COPY experiment/ experiment/
+COPY interpolation/ interpolation/
 COPY lib/ lib/
 COPY utils/ utils/
 COPY .handler.yaml .handler.yaml
