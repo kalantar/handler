@@ -10,11 +10,8 @@ COPY go.sum go.sum
 RUN go mod download
 
 # Copy the go source
-COPY base/ base/
 COPY cmd/ cmd/
-COPY experiment/ experiment/
-COPY lib/ lib/
-COPY utils/ utils/
+COPY tasks/ tasks/
 COPY .handler.yaml .handler.yaml
 COPY main.go main.go
 

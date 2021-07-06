@@ -1,4 +1,4 @@
-package cmd
+package knative
 
 import (
 	"testing"
@@ -20,25 +20,25 @@ func TestAPI(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	log = tasks.GetLogger()
 	log.SetOutput(GinkgoWriter)
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{}
 	var err error
-	// create a "fake" k8s cluster and mock the getConfig lambda function
-	restConf, err := testEnv.Start()
+	var restConf *rest.Config
+	// create a "fake" k8s cluster and get client config in restConf
+	restConf, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(restConf).ToNot(BeNil())
-	tasks.GetConfig = func() (*rest.Config, error) {
-		return restConf, err
-	}
 	// Install CRDs into the cluster
-	crdPath := tasks.CompletePath("../", "testdata/crd/bases")
+	crdPath := tasks.CompletePath("../../../", "testdata/crd/bases")
 	_, err = envtest.InstallCRDs(restConf, envtest.CRDInstallOptions{Paths: []string{crdPath}})
 	Expect(err).ToNot(HaveOccurred())
 
 	By("initializing k8sclient")
+	tasks.GetConfig = func() (*rest.Config, error) {
+		return restConf, err
+	}
 	k8sClient, err = tasks.GetClient()
 	Expect(k8sClient).ToNot(BeNil())
 	Expect(err).ToNot(HaveOccurred())

@@ -4,18 +4,17 @@ import (
 	"context"
 	"os"
 
-	"github.com/iter8-tools/handler/experiment"
-	"github.com/iter8-tools/handler/utils"
+	"github.com/iter8-tools/handler/tasks"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Experiment's handler field", func() {
-	var exp *experiment.Experiment
+	var exp *tasks.Experiment
 	var err error
 	var head = func() {
 		By("reading the experiment from file")
-		exp, err = (&experiment.Builder{}).FromFile(utils.CompletePath("../", "testdata/experiment6.yaml")).Build()
+		exp, err = (&tasks.Builder{}).FromFile(tasks.CompletePath("../", "testdata/experiment6.yaml")).Build()
 		Expect(err).ToNot(HaveOccurred())
 	}
 	var create = func() {

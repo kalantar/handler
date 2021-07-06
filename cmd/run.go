@@ -7,13 +7,11 @@ import (
 	"strings"
 
 	"github.com/iter8-tools/etc3/api/v2alpha2"
-	"github.com/iter8-tools/handler/base"
-	"github.com/iter8-tools/handler/experiment"
-	"github.com/iter8-tools/handler/lib/common"
-	"github.com/iter8-tools/handler/lib/knative"
-	"github.com/iter8-tools/handler/lib/metrics"
-	"github.com/iter8-tools/handler/lib/notification"
-	"github.com/iter8-tools/handler/utils"
+	"github.com/iter8-tools/handler/tasks"
+	"github.com/iter8-tools/handler/tasks/lib/common"
+	"github.com/iter8-tools/handler/tasks/lib/knative"
+	"github.com/iter8-tools/handler/tasks/lib/metrics"
+	"github.com/iter8-tools/handler/tasks/lib/notification"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/types"
@@ -34,8 +32,8 @@ func getExperimentNN() (*types.NamespacedName, error) {
 }
 
 // GetAction converts an action spec into an action.
-func GetAction(exp *experiment.Experiment, actionSpec v2alpha2.Action) (base.Action, error) {
-	action := make(base.Action, len(actionSpec))
+func GetAction(exp *tasks.Experiment, actionSpec v2alpha2.Action) (tasks.Action, error) {
+	action := make(tasks.Action, len(actionSpec))
 	var err error
 Loop:
 	for i := 0; i < len(actionSpec); i++ {
@@ -72,13 +70,13 @@ Loop:
 func run(cmd *cobra.Command, args []string) error {
 	nn, err := getExperimentNN()
 	if err == nil {
-		var exp *experiment.Experiment
-		if exp, err = (&experiment.Builder{}).FromCluster(nn).Build(); err == nil {
+		var exp *tasks.Experiment
+		if exp, err = (&tasks.Builder{}).FromCluster(nn).Build(); err == nil {
 			var actionSpec v2alpha2.Action
 			if actionSpec, err = exp.GetActionSpec(action); err == nil {
-				var action base.Action
+				var action tasks.Action
 				if action, err = GetAction(exp, actionSpec); err == nil {
-					ctx := context.WithValue(context.Background(), utils.ContextKey("experiment"), exp)
+					ctx := context.WithValue(context.Background(), tasks.ContextKey("experiment"), exp)
 					log.Trace("created context for experiment")
 					err = action.Run(ctx)
 					if err == nil {

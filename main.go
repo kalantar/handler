@@ -3,14 +3,14 @@ package main
 
 import (
 	"github.com/iter8-tools/handler/cmd"
-	"github.com/iter8-tools/handler/utils"
+	"github.com/iter8-tools/handler/tasks"
 	"github.com/sirupsen/logrus"
 )
 
 var log *logrus.Logger
 
 func init() {
-	log = utils.GetLogger()
+	log = tasks.GetLogger()
 }
 
 func main() {

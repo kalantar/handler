@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/iter8-tools/handler/utils"
+	"github.com/iter8-tools/handler/tasks"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -45,7 +45,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", ".handler.yaml", "config file (default is .handler.yaml)")
-	log = utils.GetLogger()
+	log = tasks.GetLogger()
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -75,6 +75,6 @@ func initConfig() {
 
 	ll, err := logrus.ParseLevel(viper.GetString("log_level"))
 	if err == nil {
-		utils.SetLogLevel(ll)
+		tasks.SetLogLevel(ll)
 	}
 }
